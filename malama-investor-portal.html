@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mālama Labs Investor Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      /* Updated to match logo blue */
+      --primary-dark: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.4);
+      --bg-dark: #0a0f0d;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f9fafb;
+      --text-dim: #9ca3af;
+      --gold: #fbbf24;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(234, 88, 12, 0.03) 0%, transparent 50%);
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      aside,
+      header,
+      footer,
+      .nav-btn,
+      .calc-inputs,
+      .metrics-grid,
+      .subtitle,
+      button {
+        display: none !important;
+      }
+
+      .container {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+
+      main {
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .page {
+        display: none !important;
+      }
+
+      #term-sheet {
+        display: block !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        border: none !important;
+        min-height: auto !important;
+      }
+
+      .glass {
+        background: none !important;
+        border: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+    }
+
+    /* TERM SHEET STYLING */
+    #term-sheet-doc {
+      background: #fff;
+      color: #000;
+      padding: 4rem;
+      max-width: 850px;
+      margin: 2rem auto;
+      font-family: serif;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      line-height: 1.6;
+    }
+
+    @media print {
+      #term-sheet-doc {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: none !important;
+      }
+    }
+
+    .ts-header {
+      border-bottom: 2px solid #000;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .ts-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .ts-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dotted #ccc;
+      padding: 0.5rem 0;
+    }
+
+    .ts-label {
+      font-weight: 700;
+    }
+
+    /* GLASSMORPHISM UTILITIES */
+    .glass {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+    }
+
+    /* LOGIN OVERLAY */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 2.5rem;
+      text-align: center;
+      animation: fadeInLogin 0.8s ease-out;
+    }
+
+    @keyframes fadeInLogin {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-text h1 {
+      font-family: serif;
+      font-weight: 800;
+      color: #3b82f6;
+      /* Matching the blue in the logo */
+    }
+
+    .login-card h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .login-card p {
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.875rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+
+    /* HEADER */
+    header {
+      padding: 1rem 2rem;
+      background: rgba(10, 15, 13, 0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      font-size: 1.75rem;
+      filter: drop-shadow(0 0 10px var(--primary-glow));
+    }
+
+    .logo-text h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text p {
+      font-size: 0.7rem;
+      color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-right: 1.5rem;
+      border-right: 1px solid var(--card-border);
+    }
+
+    .profile-info div:first-child {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #fff;
+    }
+
+    .profile-info div:last-child {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* LAYOUT */
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    aside {
+      width: 260px;
+      background: rgba(255, 255, 255, 0.01);
+      border-right: 1px solid var(--card-border);
+      padding: 2rem 1rem;
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    nav button {
+      padding: 0.875rem 1rem;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    nav button.active {
+      background: var(--primary);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    nav button:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+    }
+
+    .page-header {
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+
+    /* CARDS & GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .metric-card {
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, transparent 50%, var(--primary-glow) 100%);
+      opacity: 0.2;
+    }
+
+    .metric-card .label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .metric-card .value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .metric-card .detail {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    /* TABLES */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      padding: 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr.highlight {
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    /* PROJECT CARDS */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      padding: 1.5rem;
+    }
+
+    .project-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+    }
+
+    .progress-wrapper {
+      margin-top: 1.5rem;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* SAFE CALCULATOR */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .calc-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .calc-results {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid var(--primary-glow);
+      border-radius: 12px;
+    }
+
+    .calc-result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .calc-result-label {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .calc-result-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      aside {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--card-border);
+      }
+
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div id="login-overlay">
+    <div class="login-card glass">
+      <img src="malama_logo.png" alt="Mālama Labs Logo" style="width: 120px; height: auto; margin-bottom: 2rem;">
+      <p>Enter your credentials to access the SAFE portal</p>
+      <form id="login-form">
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" value="investor@malama-labs.io" required>
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" value="••••••••" required>
+        </div>
+        <button type="submit" class="login-btn">ACCESS PORTAL</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <div class="logo">
+        <img src="malama_logo.png" alt="Mālama Labs Logo" style="width: 48px; height: auto;">
+        <div class="logo-text">
+          <h1 style="font-size: 1.5rem; letter-spacing: -0.02em;">mālama <span style="color: #ea580c;">labs</span></h1>
+          <p style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em;">
+            Verified Carbon Equity</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-right" style="display: flex; align-items: center; gap: 1.5rem;">
+      <div class="user-profile">
+        <div class="profile-info">
+          <div id="user-display-name">Alexandra Chen</div>
+          <div id="user-display-role">Lead Investor</div>
+        </div>
+      </div>
+      <button id="logout-btn"
+        style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; font-weight: 600;">LOGOUT</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <div class="container">
+    <!-- SIDEBAR -->
+    <aside>
+      <nav>
+        <button class="nav-btn active" data-page="dashboard"><span>📊</span> Dashboard</button>
+        <button class="nav-btn" data-page="safe-invest"><span>🤝</span> SAFE Round</button>
+        <button class="nav-btn" data-page="financials"><span>📈</span> Project Economics</button>
+        <button class="nav-btn" data-page="projects"><span>📍</span> Project Tracker</button>
+        <button class="nav-btn" data-page="cap-table"><span>👥</span> Cap Table</button>
+        <button class="nav-btn" data-page="documents"><span>📄</span> Data Room</button>
+      </nav>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+      <main style="flex: 1; overflow-y: auto;">
+        <!-- DASHBOARD PAGE -->
+        <div id="dashboard" class="page">
+          <div class="page-header">
+            <h1>Investment Overview</h1>
+            <p class="subtitle">Real-time performance of your carbon equity holdings</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card glass">
+              <div class="label">Total Committed</div>
+              <div class="value">$100,000</div>
+              <div class="detail" style="color: var(--primary);">● Active SAFE</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">Current Equity (Est)</div>
+              <div class="value">1.18%</div>
+              <div class="detail">Based on $8.5M cap</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">LCO₂ Presale Tokens</div>
+              <div class="value">500</div>
+              <div class="detail" style="color: var(--gold);">Waiting for Gate 2</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">Projected Exit Value</div>
+              <div class="value">$1.2M</div>
+              <div class="detail" style="color: var(--primary);">↑ 12x Projected</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">dMRV & Verification Transparency</div>
+            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+              <div class="glass" style="padding: 1.5rem;">
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">🛰️</div>
+                <div style="font-weight: 700; margin-bottom: 0.5rem;">Real-time Monitoring</div>
+                <p style="font-size: 0.85rem; color: var(--text-dim);">IoT sensor network deployed across Idaho sites,
+                  tracking soil moisture, pH, and basalt dissolution rates 24/7.</p>
+              </div>
+              <div class="glass" style="padding: 1.5rem;">
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">🔗</div>
+                <div style="font-weight: 700; margin-bottom: 0.5rem;">Immutable Audit Trail</div>
+                <p style="font-size: 0.85rem; color: var(--text-dim);">All baseline characterizations and measurement
+                  logs
+                  are hashed and recorded on-chain for registry-grade custody.</p>
+              </div>
+              <div class="glass" style="padding: 1.5rem;">
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">🔄</div>
+                <div style="font-weight: 700; margin-bottom: 0.5rem;">LCO₂ → VCO₂ Lifecycle</div>
+                <p style="font-size: 0.85rem; color: var(--text-dim);">Liquid Carbon (LCO₂) represents forward
+                  commitments. Upon independent 3rd party audit (Gate 4), tokens convert to ISO-aligned VCO₂ credits.
+                </p>
+              </div>
+              <!-- NEW: HAWAII PROJECT CARD -->
+              <div class="glass" style="padding: 1.5rem; border-top: 3px solid var(--gold);">
+                <div style="font-size: 1.25rem; margin-bottom: 1rem;">🏝️</div>
+                <div style="font-weight: 700; margin-bottom: 0.5rem;">The Mālama Project (Hawaii)</div>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.75rem;">Distributed Hawaii Carbon
+                  Credits on Cardano.</p>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.4rem;">
+                  <span>Status:</span>
+                  <span style="color: var(--primary); font-weight: 700;">COMPLETE</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.4rem;">
+                  <span>Grant Allocation:</span>
+                  <span style="color: #fff;">100,000 $ADA</span>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.5;">Empowering small landowners
+                  with blockchain-based carbon markets. Catalyst ID: #1200230.</p>
+                <a href="https://projectcatalyst.io/funds/12/cardano-use-cases-concept/the-malama-project-distributed-hawaii-carbon-credits-on-cardano"
+                  target="_blank"
+                  style="display: inline-block; margin-top: 1rem; color: var(--primary); font-size: 0.7rem; font-weight: 700; text-decoration: none;">CATALYST
+                  PROPOSAL ↗</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Portfolio Performance</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Round</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="highlight">
+                    <td><strong>Seed Series A</strong></td>
+                    <td>Jan 2026</td>
+                    <td>$1.2M Target</td>
+                    <td><span style="color: var(--primary);">● ACTIVE</span></td>
+                    <td>Valuation Cap: $8.5M</td>
+                  </tr>
+                  <tr>
+                    <td>MFN Investor 1</td>
+                    <td>Oct 2025</td>
+                    <td>$250,000</td>
+                    <td><span style="color: var(--gold);">● CONVERTED</span></td>
+                    <td>Seed SAFE Terms</td>
+                  </tr>
+                  <tr>
+                    <td>MFN Investor 2</td>
+                    <td>Oct 2025</td>
+                    <td>$15,000</td>
+                    <td><span style="color: var(--gold);">● CONVERTED</span></td>
+                    <td>Seed SAFE Terms</td>
+                  </tr>
+                  <tr>
+                    <td>Cardano Grant</td>
+                    <td>Oct 2024</td>
+                    <td>100,000 ADA</td>
+                    <td><span style="color: var(--primary);">● COMPLETED</span></td>
+                    <td>Catalyst ID: #1200230</td>
+                  </tr>
+                  <tr>
+                    <td>Pre-Seed</td>
+                    <td>Oct 2025</td>
+                    <td>$50,000</td>
+                    <td><span style="color: var(--text-dim);">● CONVERTED</span></td>
+                    <td>Founding Round</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAFE ROUND PAGE -->
+        <div id="safe-invest" class="page hidden">
+          <div class="page-header">
+            <h1>SAFE Investment Portal</h1>
+            <p class="subtitle">Series A Funding Round - Open Participation</p>
+          </div>
+
+          <div class="section">
+            <div class="calc-grid">
+              <div class="calc-inputs glass" style="padding: 2rem;">
+                <h3 style="margin-bottom: 1.5rem;">Equity Calculator</h3>
+                <div class="input-group">
+                  <label>Investment Amount ($)</label>
+                  <input type="number" id="calc-amount" value="100000" step="5000">
+                </div>
+                <div class="input-group">
+                  <label>Valuation Cap ($)</label>
+                  <input type="number" id="calc-cap" value="8500000" readonly
+                    style="opacity: 0.7; cursor: not-allowed; background: rgba(255,255,255,0.02);">
+                </div>
+                <div class="input-group">
+                  <label>Discount Rate (%)</label>
+                  <input type="number" id="calc-discount" value="20" readonly
+                    style="opacity: 0.7; cursor: not-allowed; background: rgba(255,255,255,0.02);">
+                </div>
+                <p style="font-size: 0.7rem; color: var(--gold); margin-top: -0.5rem; line-height: 1.2;">
+                  *Note: Token side letter allows purchase at the lowest rate available across rounds.
+                </p>
+                <button class="login-btn" onclick="generateTermSheet()">REQUEST TERM SHEET</button>
+              </div>
+
+              <div class="calc-results glass">
+                <h3 style="margin-bottom: 1.5rem;">Projected Terms</h3>
+                <div class="calc-result-item">
+                  <span class="calc-result-label">Ownership Percentage</span>
+                  <span class="calc-result-value" id="res-equity">1.18%</span>
+                </div>
+                <div style="height: 1px; background: var(--card-border); margin: 0.5rem 0;"></div>
+                <div class="calc-result-item">
+                  <span class="calc-result-label">Implied Share Price</span>
+                  <span class="calc-result-value" id="res-price">$0.85</span>
+                </div>
+                <div style="height: 1px; background: var(--card-border); margin: 0.5rem 0;"></div>
+                <div class="calc-result-item">
+                  <span class="calc-result-label">LCO₂ Bonus Tokens</span>
+                  <span class="calc-result-value" style="color: var(--gold);">500 Tokens</span>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2rem;">
+                  *Calculations assume a post-money valuation cap and are for Illustrative purposes only. Consult the
+                  official SAFE document for legal terms.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Round Terms</div>
+            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+              <div class="metric-card glass" style="padding: 1.25rem; border-top: 3px solid var(--primary);">
+                <div class="label"
+                  style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                  TARGET RAISE</div>
+                <div class="value" style="font-size: 1.5rem; color: #fff;">$1.2M</div>
+              </div>
+              <div class="metric-card glass" style="padding: 1.25rem; border-top: 3px solid var(--gold);">
+                <div class="label"
+                  style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                  VALUATION CAP</div>
+                <div class="value" style="font-size: 1.5rem; color: #fff;">$8.5M</div>
+              </div>
+              <div class="metric-card glass" style="padding: 1.25rem; border-top: 3px solid #8b5cf6;">
+                <div class="label"
+                  style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                  DISCOUNT</div>
+                <div class="value" style="font-size: 1.5rem; color: #fff;">20%</div>
+              </div>
+              <div class="metric-card glass" style="padding: 1.25rem; border-top: 3px solid #6b7280;">
+                <div class="label"
+                  style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                  MINIMUM</div>
+                <div class="value" style="font-size: 1.5rem; color: #fff;">$25K</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROJECT ECONOMICS (FINANCIALS) PAGE -->
+        <div id="financials" class="page hidden">
+          <div class="page-header">
+            <h1>Project Unit Economics</h1>
+            <p class="subtitle">Validated Carbon Removal (VCO₂) Pricing & Margins</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card glass">
+              <div class="label">Steady State Margin</div>
+              <div class="value">76%</div>
+              <div class="detail" style="color: var(--primary);">Optimized Model</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">Total CapEx Needed</div>
+              <div class="value">$1.85M</div>
+              <div class="detail">to Profitability</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">Steady State EBITDA</div>
+              <div class="value">$1.66M</div>
+              <div class="detail" style="color: var(--primary);">Annual @ 1k Ac</div>
+            </div>
+            <div class="metric-card glass">
+              <div class="label">Break-Even Point</div>
+              <div class="value">Q3 2030</div>
+              <div class="detail" style="color: var(--gold);">5-Year Roadmap</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">5-Year Scaling Projections</div>
+            <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 1.5rem;">Based on a 15% verification fee
+              SaaS model across expanded Idaho sites.</p>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Acreage</th>
+                    <th>Annual Revenue</th>
+                    <th>Net Cash Flow</th>
+                    <th>Cumulative Cash</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2026</td>
+                    <td>47 (Pilot)</td>
+                    <td>$14k</td>
+                    <td>-$118k</td>
+                    <td>-$118k</td>
+                  </tr>
+                  <tr>
+                    <td>2027</td>
+                    <td>250 ac</td>
+                    <td>$53k</td>
+                    <td>-$353k</td>
+                    <td>-$471k</td>
+                  </tr>
+                  <tr class="highlight">
+                    <td>2028</td>
+                    <td>500 ac</td>
+                    <td>$348k</td>
+                    <td>-$418k</td>
+                    <td>-$889k</td>
+                  </tr>
+                  <tr>
+                    <td>2029</td>
+                    <td>1,000 ac</td>
+                    <td>$1.82M</td>
+                    <td>+$284k</td>
+                    <td>-$605k</td>
+                  </tr>
+                  <tr>
+                    <td>2030</td>
+                    <td>1,000 ac</td>
+                    <td>$3.85M</td>
+                    <td>+$1.66M</td>
+                    <td>+$1.06M</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Carbon Price Sensitivity (%)</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Carbon Price</th>
+                    <th>$30/tCO₂e</th>
+                    <th>$60/tCO₂e (Base)</th>
+                    <th>$90/tCO₂e</th>
+                    <th>$120/tCO₂e</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Expected Return</td>
+                    <td>+54%</td>
+                    <td>+208%</td>
+                    <td>+362%</td>
+                    <td>+515%</td>
+                  </tr>
+                  <tr>
+                    <td>Annualized IRR</td>
+                    <td>+27.4%</td>
+                    <td>+100.0%</td>
+                    <td>+106.0%</td>
+                    <td>+245.0%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">Project Unit Economics (Detailed)</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Cost</th>
+                    <th>CO₂e</th>
+                    <th>Cost/tCO₂e</th>
+                    <th>Presale Value</th>
+                    <th>Validated Value</th>
+                    <th>Margin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Glenns Ferry</td>
+                    <td>$126,500</td>
+                    <td>940</td>
+                    <td>$134.57</td>
+                    <td>$70,500</td>
+                    <td>$150,400</td>
+                    <td style="color: var(--primary);">+18.9%</td>
+                  </tr>
+                  <tr>
+                    <td>Hammett</td>
+                    <td>$114,300</td>
+                    <td>680</td>
+                    <td>$168.09</td>
+                    <td>$51,000</td>
+                    <td>$108,800</td>
+                    <td style="color: #ef4444;">-4.8%</td>
+                  </tr>
+                  <tr class="highlight">
+                    <td><strong>Portfolio Total</strong></td>
+                    <td><strong>$240,800</strong></td>
+                    <td><strong>1,620</strong></td>
+                    <td><strong>$148.64</strong></td>
+                    <td><strong>$121,500</strong></td>
+                    <td><strong>$259,200</strong></td>
+                    <td><strong style="color: var(--primary);">+7.6%</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROJECT TRACKER PAGE -->
+        <div id="projects" class="page hidden">
+          <div class="page-header">
+            <h1>Project Tracker</h1>
+            <p class="subtitle">On-chain deployment & verification status</p>
+          </div>
+
+          <div class="project-grid">
+            <div class="project-card glass">
+              <h3>Glenns Ferry</h3>
+              <div class="project-tags">
+                <span class="tag">IDAHO</span>
+                <span class="tag">ERW + BIOCHAR</span>
+                <span class="tag">100 ACRES</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-dim);">Phase 2 deployment active. Basalt materials
+                arriving
+                on site.</p>
+              <div class="progress-wrapper">
+                <div class="progress-info">
+                  <span>Phase 2: Deployment</span>
+                  <span>65%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 65%;"></div>
+                </div>
+              </div>
+              <div style="margin-top: 1rem; display: flex; justify-content: space-between; font-size: 0.75rem;">
+                <span>Target: 940 tCO₂e</span>
+                <span style="color: var(--primary);">Est. Verification Oct 2027</span>
+              </div>
+            </div>
+
+            <div class="project-card glass">
+              <h3>Hammett</h3>
+              <div class="project-tags">
+                <span class="tag">IDAHO</span>
+                <span class="tag">ERW + BIOCHAR</span>
+                <span class="tag">85 ACRES</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-dim);">Phase 1 Baseline complete. Soil sensors installed
+                for
+                real-time monitoring.</p>
+              <div class="progress-wrapper">
+                <div class="progress-info">
+                  <span>Phase 1: Baseline</span>
+                  <span>45%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 45%; background: var(--gold);"></div>
+                </div>
+              </div>
+              <div style="margin-top: 1rem; display: flex; justify-content: space-between; font-size: 0.75rem;">
+                <span>Target: 680 tCO₂e</span>
+                <span style="color: var(--primary);">Est. Verification April 2028</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" style="margin-top: 3rem;">
+            <div class="section-title">Deployment Milestones</div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div class="glass" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div
+                  style="width: 12px; height: 12px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow);">
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 0.9rem;">Gate 2: Phase 1 Baseline Lock</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Objective: Secure initial soil
+                    characterization
+                    on-chain.</div>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">COMPLETED</div>
+              </div>
+              <div class="glass" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div
+                  style="width: 12px; height: 12px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);">
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 700; font-size: 0.9rem;">Gate 3: Phase 2 Deployment Start</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Objective: Finalize material distribution and
+                    sensor network.</div>
+                </div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--gold);">IN PROGRESS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DATA ROOM (DOCUMENTS) PAGE -->
+        <div id="documents" class="page hidden">
+          <div class="page-header">
+            <h1>Investor Data Room</h1>
+            <p class="subtitle">Secure access to due diligence and legal materials</p>
+          </div>
+
+          <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+            <a href="javascript:void(0)" onclick="viewDocument('01_EXECUTIVE_SUMMARY.md', 'Executive Summary')"
+              class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">📄</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">Executive Summary</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Investment thesis & carbon
+                  market outlook</div>
+                <div style="font-size: 0.7rem; color: var(--primary); margin-top: 0.75rem;">MD • Updated Jan 29</div>
+              </div>
+            </a>
+            <a href="javascript:void(0)" onclick="viewDocument('02_FINANCIAL_MODEL_DETAILED.md', 'Financial Model')"
+              class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">📊</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">Financial Model - Detailed</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Unit economics, sensitivity
+                  analysis, and scaling</div>
+                <div style="font-size: 0.7rem; color: var(--primary); margin-top: 0.75rem;">MD • Updated Jan 29</div>
+              </div>
+            </a>
+            <a href="javascript:void(0)" onclick="viewDocument('malama_investment_memo.md', 'Investment Memo')"
+              class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">📔</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">Investment Memo</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Detailed Seed A thesis and
+                  allocation strategy</div>
+                <div style="font-size: 0.7rem; color: var(--primary); margin-top: 0.75rem;">MD • Updated Jan 29</div>
+              </div>
+            </a>
+            <a href="javascript:void(0)" onclick="viewDocument('malama_cap_table_legal.md', 'Legal & SAFE Terms')"
+              class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">⚖️</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">Legal & SAFE Terms</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Standard Post-Money SAFE &
+                  Side
+                  Letter</div>
+                <div style="font-size: 0.7rem; color: var(--primary); margin-top: 0.75rem;">MD • Updated Jan 29</div>
+              </div>
+            </a>
+
+            <!-- NEW: SCALING PLAN -->
+            <a href="javascript:void(0)" onclick="viewDocument('03_SCALING_PLAN_IDAHO.md', 'ERW Scaling Plan')"
+              class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">🚀</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">ERW Scaling Plan</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Idaho Expansion to 1,000+
+                  Acres</div>
+                <div style="font-size: 0.7rem; color: var(--gold); font-weight: 700; margin-top: 0.75rem;">MD • NEW DATA
+                </div>
+              </div>
+            </a>
+            <a href="javascript:void(0)"
+              onclick="viewDocument('malama_integrated_methodology_model.md', 'Technical Methodology')" class="glass"
+              style="padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit;">
+              <div style="font-size: 1.5rem;">🌱</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700;">Technical Methodology</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Isometric-aligned carbon
+                  removal
+                  protocol</div>
+                <div style="font-size: 0.7rem; color: var(--primary); margin-top: 0.75rem;">MD • Updated Jan 26</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- ADDED SECTION: CAP TABLE -->
+        <div id="cap-table" class="page hidden">
+          <div class="page-header">
+            <h1>Capitalization Table</h1>
+            <p class="subtitle">Ownership distribution and ESOP allocation</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Current Ownership (Pre-Money)</div>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                  <span>Tyler Malin (Founder)</span>
+                  <span style="font-weight: 700;">30.0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 30%;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                  <span>Jeffrey Wise (Founder)</span>
+                  <span style="font-weight: 700;">30.0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 30%; background: var(--gold);"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                  <span>Dominick Garey (Founder)</span>
+                  <span style="font-weight: 700;">30.0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 30%; background: #8b5cf6;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                  <span>ESOP (Option Pool)</span>
+                  <span style="font-weight: 700;">10.0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 10%; background: #3b82f6;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Funding Roadmap</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stage</th>
+                    <th>Detail / Valuation</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Cardano Grant</td>
+                    <td>100k ADA (#1200230)</td>
+                    <td>Completed</td>
+                  </tr>
+                  <tr>
+                    <td>Pre-Seed</td>
+                    <td>$50k Founders / $265k MFN SAFE</td>
+                    <td>Converted</td>
+                  </tr>
+                  <tr class="highlight">
+                    <td>Seed Series A</td>
+                    <td>$8.5M Cap (Active Round)</td>
+                    <td>Active</td>
+                  </tr>
+                  <tr>
+                    <td>Series B</td>
+                    <td>Projected $25M+</td>
+                    <td>Future</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="document-viewer" class="page hidden">
+          <div class="page-header" style="margin-bottom: 2rem;">
+            <nav class="breadcrumbs"
+              style="display: flex; gap: 0.5rem; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; align-items: center;">
+              <span style="cursor: pointer;" onclick="showPage('documents')">Data Room</span>
+              <span>/</span>
+              <span id="breadcrumb-current" style="color: var(--primary); font-weight: 600;">Document</span>
+            </nav>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h1 id="doc-title" style="font-size: 2rem;">Document Viewer</h1>
+                <p class="subtitle" id="doc-subtitle">Mālama Labs Technical Documentation</p>
+              </div>
+              <button class="nav-btn" onclick="showPage('documents')"
+                style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 0.6rem 1.2rem; cursor: pointer; border-radius: 8px; color: #fff;">←
+                BACK TO DATA ROOM</button>
+            </div>
+          </div>
+          <div id="markdown-content" class="glass"
+            style="padding: 3rem; background: rgba(255,255,255,0.02); line-height: 1.7; color: var(--text-main); max-width: 900px; margin: 0 auto; overflow-y: auto; max-height: 65vh; border: 1px solid var(--card-border);">
+            <p style="text-align: center; color: var(--text-dim);">Loading document...</p>
+          </div>
+        </div>
+
+        <!-- TERM SHEET PAGE -->
+        <div id="term-sheet" class="page hidden" style="padding: 2rem;">
+          <div class="page-header"
+            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h1 style="font-size: 2rem;">Investment Term Sheet</h1>
+              <p class="subtitle">Personalized draft based on your calculator inputs</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <button class="nav-btn" onclick="showPage('safe-invest')"
+                style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 0.6rem 1.2rem; cursor: pointer; border-radius: 8px; color: #fff;">←
+                EDIT TERMS</button>
+              <button class="login-btn" onclick="window.print()" style="margin-top: 0; padding: 0.6rem 1.2rem;">⎙ PRINT
+                DOCUMENT</button>
+            </div>
+          </div>
+
+          <div id="term-sheet-doc">
+            <div class="ts-header">
+              <h1 style="font-size: 1.75rem; color: #000; margin-bottom: 0.25rem;">MĀLAMA LABS INC.</h1>
+              <p style="font-size: 0.9rem; letter-spacing: 0.1em; color: #666;">SERIES A FUNDING • TERM SHEET SUMMARY
+              </p>
+            </div>
+
+            <div class="ts-section">
+              <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">This Term Sheet summarizes the principal terms of
+                the proposed investment in <strong>Mālama Labs Inc.</strong> (the "Company") by the Investor named
+                below. This document is for illustrative purposes and does not constitute a legally binding agreement.
+              </p>
+
+              <div class="ts-row">
+                <span class="ts-label">Date:</span>
+                <span id="ts-date">January 29, 2026</span>
+              </div>
+              <div class="ts-row">
+                <span class="ts-label">Investor:</span>
+                <span id="ts-investor-name">investor@example.com</span>
+              </div>
+            </div>
+
+            <div class="ts-section">
+              <h3 style="border-bottom: 1px solid #000; margin-bottom: 1rem; font-size: 1.1rem;">INVESTMENT TERMS</h3>
+              <div class="ts-row">
+                <span class="ts-label">Investment Amount:</span>
+                <span id="ts-amount" style="font-weight: 700;">$100,000.00</span>
+              </div>
+              <div class="ts-row">
+                <span class="ts-label">Instrument:</span>
+                <span>Simple Agreement for Future Equity (SAFE)</span>
+              </div>
+              <div class="ts-row">
+                <span class="ts-label">Valuation Cap:</span>
+                <span id="ts-cap">$8,500,000.00 (Post-Money)</span>
+              </div>
+              <div class="ts-row">
+                <span class="ts-label">Discount Rate:</span>
+                <span>20%</span>
+              </div>
+              <div class="ts-row">
+                <span class="ts-label">Estimated Equity:</span>
+                <span id="ts-equity" style="font-weight: 700;">1.176%</span>
+              </div>
+            </div>
+
+            <div class="ts-section">
+              <h3 style="border-bottom: 1px solid #000; margin-bottom: 1rem; font-size: 1.1rem;">TOKEN SIDE LETTER
+                ADVANTAGES</h3>
+              <p style="font-size: 0.85rem;">In addition to the SAFE equity interest, the Investor shall receive LCO₂
+                Bonus Tokens subject to the following guarantees:</p>
+              <ul style="font-size: 0.85rem; margin-top: 1rem; margin-left: 1.5rem;">
+                <li><strong>Lowest Rate Guarantee:</strong> Right to purchase tokens at the lowest rate available across
+                  all funding rounds.</li>
+                <li><strong>Priority Allocation:</strong> Guaranteed allocation in the initial production batch of
+                  verified carbon credits.</li>
+                <li><strong>Governance Rights:</strong> Participation in the dMRV verification advisory council.</li>
+              </ul>
+            </div>
+
+            <div class="ts-section" style="margin-top: 4rem;">
+              <div style="display: flex; gap: 4rem;">
+                <div style="flex: 1;">
+                  <div style="border-top: 1px solid #000; padding-top: 0.5rem; font-size: 0.8rem; font-weight: 700;">
+                    Mālama Labs Inc. (Company)</div>
+                </div>
+                <div style="flex: 1;">
+                  <div style="border-top: 1px solid #000; padding-top: 0.5rem; font-size: 0.8rem; font-weight: 700;">
+                    Investor Signature</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer
+        style="padding: 3rem; background: rgba(0,0,0,0.2); border-top: 1px solid var(--card-border); margin-top: auto;">
+        <div class="footer-content"
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto;">
+          <div class="footer-section">
+            <div class="logo" style="margin-bottom: 1rem;">
+              <img src="malama_logo.png" alt="Mālama Labs Logo" style="width: 32px; height: auto;">
+              <h3 style="font-size: 1rem; color: #fff;">mālama <span style="color: #ea580c;">labs</span></h3>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.5;">Climate Fintech Infrastructure
+              bridging institutional capital with high-integrity carbon removal projects.</p>
+          </div>
+          <div class="footer-section">
+            <h4
+              style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+              Investment Portal</h4>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;">Series A Funding Round</p>
+            <p style="font-size: 0.8rem; color: var(--text-dim);">Investor Relations v2.2</p>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">© 2026 Mālama Labs Inc.</p>
+          </div>
+          <div class="footer-section">
+            <h4
+              style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+              Contact</h4>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;">
+              <a href="mailto:tyler@malamalabs.com"
+                style="color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s;"
+                onmouseover="this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.borderColor='transparent'">tyler@malamalabs.com</a>
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">
+              <a href="https://malamalabs.com" target="_blank"
+                style="color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s;"
+                onmouseover="this.style.borderColor='var(--primary)'"
+                onmouseout="this.style.borderColor='transparent'">malamalabs.com</a>
+            </p>
+            <div style="display: flex; gap: 0.75rem;">
+              <a href="https://www.linkedin.com/company/malama-labs" target="_blank" rel="noopener noreferrer"
+                style="width: 2rem; height: 2rem; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dim);"
+                aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                  <rect width="4" height="12" x="2" y="9"></rect>
+                  <circle cx="4" cy="4" r="2"></circle>
+                </svg>
+              </a>
+              <a href="https://www.youtube.com/@malamalabs" target="_blank" rel="noopener noreferrer"
+                style="width: 2rem; height: 2rem; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dim);"
+                aria-label="YouTube">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17">
+                  </path>
+                  <path d="m10 15 5-3-5-3z"></path>
+                </svg>
+              </a>
+              <a href="https://medium.com/@malamalabs" target="_blank" rel="noopener noreferrer"
+                style="width: 2rem; height: 2rem; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dim);"
+                aria-label="Medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                  </path>
+                  <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                </svg>
+              </a>
+              <a href="https://twitter.com/malamalabs" target="_blank" rel="noopener noreferrer"
+                style="width: 2rem; height: 2rem; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: var(--text-dim);"
+                aria-label="Twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z">
+                  </path>
+                </svg>
+              </a>
+            </div>
+          </div>
+          <div class="footer-section">
+            <h4
+              style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
+              Security & Compliance</h4>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;">🔒 End-to-End Encryption</p>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem;">SOC 2 Type II Compliant</p>
+            <p style="font-size: 0.8rem; color: var(--text-dim);">Reg CF / Reg D 506(c) Eligible</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // PAGE NAVIGATION
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+
+        target.classList.add('active');
+        const pageId = target.getAttribute('data-page');
+        document.getElementById(pageId).classList.remove('hidden');
+      });
+    });
+
+    // LOGIN LOGIC
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginForm = document.getElementById('login-form');
+    const loginEmail = document.getElementById('login-email');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userDisplayName = document.getElementById('user-display-name');
+
+    function updateAuthDisplay() {
+      const email = localStorage.getItem('malama_user_email');
+      if (email) {
+        userDisplayName.textContent = email;
+      }
+    }
+
+    // Check session
+    if (localStorage.getItem('malama_auth') === 'true') {
+      loginOverlay.classList.add('hidden');
+      updateAuthDisplay();
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      localStorage.setItem('malama_auth', 'true');
+      localStorage.setItem('malama_user_email', loginEmail.value);
+      updateAuthDisplay();
+
+      loginOverlay.style.opacity = '0';
+      setTimeout(() => {
+        loginOverlay.classList.add('hidden');
+      }, 500);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('malama_auth');
+      location.reload();
+    });
+
+    // BREADCRUMB / PAGE NAVIGATION HELPER
+    function showPage(pageId) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+
+      const targetPage = document.getElementById(pageId);
+      if (targetPage) targetPage.classList.remove('hidden');
+
+      const activeBtn = document.querySelector(`.nav-btn[data-page="${pageId === 'document-viewer' ? 'documents' : pageId}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Scroll to top
+      document.querySelector('main').scrollTop = 0;
+    }
+
+    // DOCUMENT VIEWING LOGIC
+    async function viewDocument(filename, title) {
+      const contentEl = document.getElementById('markdown-content');
+      document.getElementById('doc-title').textContent = title;
+      document.getElementById('breadcrumb-current').textContent = title;
+      contentEl.innerHTML = `
+        <div style="text-align: center; padding: 4rem;">
+          <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"></div>
+          <p style="color: var(--text-dim);">Fetching ${title}...</p>
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+      `;
+      showPage('document-viewer');
+
+      try {
+        // Use relative path for local server compatibility
+        const path = './' + filename;
+        const response = await fetch(path);
+
+        if (!response.ok) {
+          if (response.status === 404) throw new Error('File not found in repository.');
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
+        const text = await response.text();
+        contentEl.innerHTML = marked.parse(text);
+
+      } catch (err) {
+        console.error('Document Load Error:', err);
+
+        let errorMsg = err.message;
+        let troubleshooting = '';
+
+        if (location.protocol === 'file:') {
+          errorMsg = 'Browser Security Block';
+          troubleshooting = `
+            <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; text-align: left;">
+              <p style="color: #ef4444; font-weight: 700; margin-bottom: 0.5rem;">⚠️ Local File Access Restricted</p>
+              <p style="font-size: 0.85rem; color: var(--text-dim); line-height: 1.5;">
+                Browsers block <code>fetch()</code> requests when files are opened directly via <code>file://</code> protocol.
+                <br><br>
+                <strong>To fix this:</strong>
+                <ol style="margin-top: 0.5rem; margin-left: 1.25rem;">
+                  <li>Open this folder in VS Code.</li>
+                  <li>Click <strong>"Go Live"</strong> (Live Server extension).</li>
+                  <li>Or run <code>python -m http.server</code> in the terminal.</li>
+                </ol>
+              </p>
+            </div>
+          `;
+        }
+
+        contentEl.innerHTML = `
+          <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+            <h3 style="color: #ef4444; margin-bottom: 0.5rem;">Load Failed</h3>
+            <p style="color: var(--text-dim);">${errorMsg}</p>
+            ${troubleshooting}
+            <button onclick="showPage('documents')" style="margin-top: 2rem; background: var(--primary); color: #000; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer;">RETURN TO DATA ROOM</button>
+          </div>
+        `;
+      }
+    }
+
+    // SAFE CALCULATOR LOGIC
+    const calcAmount = document.getElementById('calc-amount');
+    const calcCap = document.getElementById('calc-cap');
+    const calcDiscount = document.getElementById('calc-discount');
+    const resEquity = document.getElementById('res-equity');
+    const resPrice = document.getElementById('res-price');
+
+    function updateCalculator() {
+      const amount = parseFloat(calcAmount.value) || 0;
+      const cap = 8500000; // Locked Cap
+
+      // Post-money SAFE calculation: Equity = Amount / Cap
+      const equity = (amount / cap) * 100;
+      resEquity.textContent = equity > 0 ? equity.toFixed(3) + '%' : '0.000%';
+
+      // Implied price (illustrative 10M shares)
+      const price = (cap / 10000000);
+      resPrice.textContent = '$' + price.toFixed(2);
+    }
+
+    [calcAmount, calcCap, calcDiscount].forEach(input => {
+      input?.addEventListener('input', updateCalculator);
+    });
+
+    // TERM SHEET GENERATION
+    function generateTermSheet() {
+      const amount = parseFloat(calcAmount.value) || 0;
+      const equity = (amount / 8500000) * 100;
+      const email = localStorage.getItem('malama_user_email') || 'investor@malamalabs.com';
+      const date = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Populate Term Sheet
+      document.getElementById('ts-amount').textContent = '$' + amount.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      document.getElementById('ts-equity').textContent = equity.toFixed(3) + '%';
+      document.getElementById('ts-investor-name').textContent = email;
+      document.getElementById('ts-date').textContent = date;
+
+      // Show Term Sheet Page
+      showPage('term-sheet');
+    }
+
+    // Initial calc run
+    if (calcAmount) updateCalculator();
+  </script>
+</body>
+
+</html>
