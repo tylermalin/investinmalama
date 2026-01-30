@@ -586,9 +586,23 @@
       }
 
       aside {
-        width: 100%;
+        width: 280px !important;
+        /* Fixed width on mobile */
         border-right: none;
         border-bottom: 1px solid var(--card-border);
+      }
+
+      header {
+        padding: 0.75rem 1rem !important;
+      }
+
+      main {
+        padding: 1.25rem !important;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
       }
 
       .calc-grid {
@@ -598,7 +612,8 @@
       /* MOBILE OVERLAY SIDEBAR */
       aside {
         position: fixed;
-        left: -260px;
+        left: -280px;
+        /* Match fixed width */
         top: 0;
         bottom: 0;
         z-index: 1000;
@@ -1469,10 +1484,10 @@
           </div>
         </div>
       </main>
-      <footer
-        style="padding: 3rem; background: rgba(0,0,0,0.2); border-top: 1px solid var(--card-border); margin-top: auto;">
+      <footer id="global-footer"
+        style="padding: 1.5rem; background: rgba(0,0,0,0.2); border-top: 1px solid var(--card-border); margin-top: auto;">
         <div class="footer-content"
-          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2.5rem; max-width: 1200px; margin: 0 auto;">
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto;">
           <div class="footer-section">
             <div class="logo" style="margin-bottom: 1rem;">
               <img src="malama_logo.png" alt="Mālama Labs Logo" style="width: 32px; height: auto;">
