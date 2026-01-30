@@ -594,11 +594,60 @@
       .calc-grid {
         grid-template-columns: 1fr;
       }
+
+      /* MOBILE OVERLAY SIDEBAR */
+      aside {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: var(--bg-dark);
+        transition: left 0.3s ease;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .mobile-nav-open aside {
+        left: 0;
+      }
+
+      .menu-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+      }
+
+      .mobile-nav-open .menu-overlay {
+        display: block;
+      }
+    }
+
+    /* HAMBURGER BUTTON */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      z-index: 1100;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
     }
   </style>
 </head>
 
-<body>
+<body class="">
+  <!-- MOBILE OVERLAY -->
+  <div class="menu-overlay" onclick="toggleMobileMenu()"></div>
   <!-- LOGIN OVERLAY -->
   <div id="login-overlay">
     <div class="login-card glass">
@@ -620,7 +669,8 @@
 
   <!-- HEADER -->
   <header>
-    <div class="header-left">
+    <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">☰</button>
       <div class="logo">
         <img src="malama_logo.png" alt="Mālama Labs Logo" style="width: 48px; height: auto;">
         <div class="logo-text">
@@ -645,7 +695,7 @@
   <!-- MAIN -->
   <div class="container">
     <!-- SIDEBAR -->
-    <aside>
+    <aside id="sidebar-nav">
       <nav>
         <button class="nav-btn active" data-page="dashboard"><span>📊</span> Dashboard</button>
         <button class="nav-btn" data-page="safe-invest"><span>🤝</span> SAFE Round</button>
@@ -1566,17 +1616,27 @@
 
     // BREADCRUMB / PAGE NAVIGATION HELPER
     function showPage(pageId) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      // Hide all pages
       document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      // Show target page
+      document.getElementById(pageId).classList.remove('hidden');
 
-      const targetPage = document.getElementById(pageId);
-      if (targetPage) targetPage.classList.remove('hidden');
+      // Update nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.page === pageId) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
 
-      const activeBtn = document.querySelector(`.nav-btn[data-page="${pageId === 'document-viewer' ? 'documents' : pageId}"]`);
-      if (activeBtn) activeBtn.classList.add('active');
+      // Close mobile menu if open
+      document.body.classList.remove('mobile-nav-open');
 
       // Scroll to top
       document.querySelector('main').scrollTop = 0;
+    }
+
+    // MOBILE MENU TOGGLE
+    function toggleMobileMenu() {
+      document.body.classList.toggle('mobile-nav-open');
     }
 
     // DOCUMENT VIEWING LOGIC
